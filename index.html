@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Viaje por el Espacio con EVE</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Comic Sans MS', 'Bubblegum Sans', 'Arial Rounded MT Bold', sans-serif;
+            background-color: #020208;
+            color: #ffffff;
+        }
+
+        /* Contenedor Principal Adaptable (Responsive) */
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #0e1638 0%, #020208 100%);
+            overflow: hidden;
+        }
+
+        /* Fondo Estelar Animado */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 80px, #fffae6, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 110px 50px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 180px 140px, #38bdf8, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 250px 250px;
+            animation: twinkle 4s infinite linear;
+            z-index: 1;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.6; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-8px); }
+            100% { opacity: 0.6; transform: translateY(0); }
+        }
+
+        /* Diapositivas */
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 20px 50px 20px;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .slide-content-box {
+            position: relative;
+            width: 90vw;
+            height: 62vh;
+            max-width: 1000px;
+            max-height: 600px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 4px solid #38bdf8;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            filter: brightness(0.95) contrast(1.1);
+        }
+
+        .slide-title-overlay {
+            position: absolute;
+            top: 15px;
+            z-index: 3;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: 2px solid #f472b6;
+            font-size: clamp(1.1rem, 2.8vw, 2.2rem);
+            color: #fef08a;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            text-align: center;
+            max-width: 88%;
+        }
+
+        /* Diapositiva Especial de Créditos Finales */
+        .credits-container {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            padding: 25px;
+            background: rgba(2, 6, 23, 0.85);
+            border-radius: 20px;
+            border: 3px solid #38bdf8;
+            max-width: 85%;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+        }
+
+        .credits-container h2 {
+            font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+            color: #fef08a;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(254, 240, 138, 0.5);
+        }
+
+        .credits-container p {
+            font-size: clamp(1rem, 2.2vw, 1.4rem);
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .credits-author {
+            color: #38bdf8 !important;
+            font-weight: bold;
+            font-size: clamp(1.1rem, 2.5vw, 1.6rem) !important;
+        }
+
+        /* Bandita Negra de Derechos Reservados en Todas las Diapositivas */
+        .footer-band {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 38px;
+            background-color: #000000;
+            border-top: 2px solid #38bdf8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 25;
+            padding: 0 12px;
+        }
+
+        .footer-band span {
+            color: #ffffff;
+            font-size: clamp(0.6rem, 1.6vw, 0.95rem);
+            letter-spacing: 0.5px;
+            font-family: Arial, sans-serif;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* FANTASMITA EVE INTERACTIVO Y EMOTIVO QUE SE MUEVE POR LA PANTALLA */
+        .ghost-wrapper {
+            position: absolute;
+            z-index: 20;
+            width: 120px;
+            height: 140px;
+            cursor: pointer;
+            transition: left 3s ease-in-out, top 3s ease-in-out;
+            filter: drop-shadow(0 0 18px rgba(56, 189, 248, 0.8));
+            pointer-events: auto;
+        }
+
+        .ghost-body {
+            position: relative;
+            width: 90px;
+            height: 110px;
+            background: linear-gradient(180deg, #ffffff 0%, #e0f2fe 70%, rgba(186, 230, 253, 0.7) 100%);
+            border-radius: 45px 45px 15px 15px;
+            box-shadow: inset -6px -6px 12px rgba(0,0,0,0.1), 0 0 25px rgba(255, 255, 255, 0.9);
+            animation: ghostFloat 2.5s ease-in-out infinite alternate;
+        }
+
+        /* Cola ondulada del fantasmita */
+        .ghost-tail {
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ghost-tail div {
+            width: 23%;
+            height: 100%;
+            background: rgba(186, 230, 253, 0.85);
+            border-radius: 0 0 15px 15px;
+            animation: tailWiggle 1.2s ease-in-out infinite alternate;
+        }
+
+        .ghost-tail div:nth-child(2) { animation-delay: 0.3s; }
+        .ghost-tail div:nth-child(3) { animation-delay: 0.6s; }
+        .ghost-tail div:nth-child(4) { animation-delay: 0.9s; }
+
+        @keyframes tailWiggle {
+            0% { transform: translateY(0) scaleY(1); }
+            100% { transform: translateY(-5px) scaleY(1.2); }
+        }
+
+        @keyframes ghostFloat {
+            0% { transform: translateY(0) rotate(-3deg); }
+            100% { transform: translateY(-18px) rotate(4deg); }
+        }
+
+        /* Ojos y Emociones de EVE */
+        .ghost-face {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ghost-eyes {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .ghost-eye {
+            width: 15px;
+            height: 20px;
+            background: #0284c7;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #38bdf8;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .ghost-eye::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 5px;
+            height: 5px;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+
+        .ghost-mouth {
+            width: 16px;
+            height: 8px;
+            background: #0369a1;
+            border-radius: 0 0 10px 10px;
+            margin-top: 6px;
+            transition: all 0.2s ease;
+        }
+
+        /* Expresión cuando habla */
+        .speaking .ghost-mouth {
+            animation: talkMouth 0.25s infinite alternate;
+        }
+
+        @keyframes talkMouth {
+            0% { height: 4px; width: 14px; border-radius: 10px; }
+            100% { height: 12px; width: 16px; border-radius: 50%; }
+        }
+
+        /* Mejillas sonrojadas */
+        .ghost-cheeks {
+            position: absolute;
+            top: 38px;
+            width: 52px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cheek {
+            width: 10px;
+            height: 6px;
+            background: #f472b6;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        /* Animación Especial al hacer Clic en EVE */
+        .spin-spin {
+            animation: ghostSpin 0.8s ease-in-out !important;
+        }
+
+        @keyframes ghostSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.3); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* Controles de Navegación */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(56, 189, 248, 0.25);
+            color: #38bdf8;
+            border: 2px solid #38bdf8;
+            font-size: clamp(1.2rem, 2.5vw, 2rem);
+            width: clamp(35px, 5vw, 50px);
+            height: clamp(60px, 12vh, 80px);
+            cursor: pointer;
+            z-index: 30;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .nav-btn:hover {
+            opacity: 1;
+            background: rgba(56, 189, 248, 0.7);
+            color: #ffffff;
+            box-shadow: 0 0 15px #38bdf8;
+        }
+
+        #prev-btn { left: 10px; }
+        #next-btn { right: 10px; }
+
+        /* Pantalla de Inicio */
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(2, 2, 8, 0.96);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #start-overlay h1 {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            color: #38bdf8;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+        }
+
+        #start-overlay p {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            color: #e2e8f0;
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+
+        #start-btn {
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+            font-family: inherit;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.8);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #start-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 35px rgba(56, 189, 248, 1);
+        }
+
+        .slide-counter {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid #38bdf8;
+            padding: 5px 14px;
+            border-radius: 15px;
+            font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+            color: #38bdf8;
+            z-index: 20;
+        }
+
+        /* Ajustes específicos para móviles */
+        @media (max-width: 768px) {
+            .slide-content-box {
+                width: 92vw;
+                height: 56vh;
+            }
+            .ghost-wrapper {
+                width: 90px;
+                height: 110px;
+            }
+            .ghost-body {
+                width: 70px;
+                height: 85px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla Inicial para Activar Audio y Música Espacial -->
+    <div id="start-overlay">
+        <h1>¡Aventura Espacial con EVE!</h1>
+        <p>Acompaña a nuestra fantasmita exploradora EVE en un viaje interactivo por el universo para niños de educación inicial.</p>
+        <button id="start-btn" onclick="startPresentation()">¡Comenzar Viaje!</button>
+    </div>
+
+    <!-- Contenedor Principal de la Presentación -->
+    <div class="presentation-container">
+        <div class="stars"></div>
+        <div class="slide-counter" id="slide-counter">1 / 21</div>
+
+        <!-- Botones discretos de Navegación -->
+        <button class="nav-btn" id="prev-btn" onclick="manualPrev()">❮</button>
+        <button class="nav-btn" id="next-btn" onclick="manualNext()">❯</button>
+
+        <!-- Diapositiva 1: Saludo Inicial -->
+        <div class="slide active" data-speech="¡Hola amiguitos y amiguitas de kínder! Yo soy EVE, su simpática fantasmita espacial. Hoy viajaremos juntos para descubrir los misterios más hermosos que brillan sobre nuestras cabezas. ¡Abrachen sus cinturones cósmicos y despegamos!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">¡Hola, Amiguitos del Espacio!</div>
+                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Espacio Exterior">
+            </div>
+        </div>
+
+        <!-- Diapositiva 2 -->
+        <div class="slide" data-speech="Miren qué hermoso se ve nuestro hogar desde el espacio lejano. Nuestro planeta Tierra es una esfera azul llena de agua, nubes blancas y hermosos campos verdes. Es el único lugar conocido que tiene vida, plantas y animalitos tan lindos como ustedes. ¡Debemos cuidar mucho nuestro planeta!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Nuestro Hermoso Planeta Tierra</div>
+                <img src="https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Planeta Tierra">
+            </div>
+        </div>
+
+        <!-- Diapositiva 3 -->
+        <div class="slide" data-speech="Por las noches, cuando miramos hacia arriba, podemos ver miles de estrellas brillantes titilando en el cielo oscuro. Las estrellas son enormes bolas de fuego gigante y caliente que brillan con muchísima fuerza a millones de kilómetros de distancia de nosotros. ¡Parecen diamantes mágicos flotando en la oscuridad!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Las Estrellas Brillantes</div>
+                <img src="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Estrellas Brillantes">
+            </div>
+        </div>
+
+        <!-- Diapositiva 4: El Sol (Imagen de alta calidad actualizada) -->
+        <div class="slide" data-speech="¿Sabían que la estrella más cercana a nosotros y la más importante es el Sol? El Sol es una estrella gigante y brillante que nos regala su luz y su calor durante todo el día. Gracias al Sol las plantitas crecen fuertes y podemos jugar felices bajo el cielo azul. ¡Buenos días, señor Sol!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">El Sol, nuestra Estrella Gigante</div>
+                <img src="https://images.unsplash.com/photo-1532693322450-2cb5c511067d?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="El Sol Radiante">
+            </div>
+        </div>
+
+        <!-- Diapositiva 5 -->
+        <div class="slide" data-speech="Acompañando a nuestra Tierra, viaja nuestra gran amiga la Luna. La Luna es un satélite natural de roca brillante que orbita alrededor de nuestro planeta. Por las noches cambia de forma y nos ilumina dulcemente mientras todos los niños pequeños duermen soñando con las estrellas. ¡Hola, doña Luna!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">La Luna y sus Fases</div>
+                <img src="https://images.unsplash.com/photo-1522030299830-16b8d3d049fe?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="La Luna">
+            </div>
+        </div>
+
+        <!-- Diapositiva 6 -->
+        <div class="slide" data-speech="Muy cerquita del Sol se encuentra Mercurio, un planeta muy pequeño y veloz. Como está tan cerca del calor del Sol, en el día hace muchísimo calor, pero en la noche hace un frío terrible. Es un planeta rocoso cubierto de pequeños cráteres causados por rocas espaciales que caen. ¡Qué aventurero es Mercurio!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Mercurio, el Planeta Veloz</div>
+                <img src="https://images.unsplash.com/photo-1614732414444-096e5f1122d5?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Mercurio">
+            </div>
+        </div>
+
+        <!-- Diapositiva 7 -->
+        <div class="slide" data-speech="El segundo planeta se llama Venus, y es el más brillante y luminoso de todos en el firmamento. Tiene una atmósfera muy gruesa llena de nubes que atrapan el calor del Sol, convirtiéndolo en el planeta más caluroso del sistema solar. ¡Brilla tanto que parece una estrella fugaz!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Venus, el Planeta Brillante</div>
+                <img src="https://images.unsplash.com/photo-1614313913007-2b4ae8ce32d6?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Venus">
+            </div>
+        </div>
+
+        <!-- Diapositiva 8 -->
+        <div class="slide" data-speech="Miren este hermoso planeta rojo llamado Marte. Le dicen el planeta rojo porque su suelo está lleno de polvo y rocas de ese color rojizo parecido al óxido. En Marte hay volcanes gigantes y cañones profundos, y los científicos mandan robots con ruedas para investigarlo todo. ¡Algún día lo visitaremos!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Marte, el Planeta Rojo</div>
+                <img src="https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Marte">
+            </div>
+        </div>
+
+        <!-- Diapositiva 9 -->
+        <div class="slide" data-speech="Ahora llegamos al rey de los planetas: ¡Júpiter! Es un planeta gigantesco hecho completamente de gas colorido con hermosas rayas de colores naranja y blanco. En Júpiter hay una tormenta gigante en forma de mancha roja que lleva soplando cientos de años. ¡Es tan grande que cabrían mil Tierras dentro de él!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Júpiter, el Gigante Gaseoso</div>
+                <img src="https://images.unsplash.com/photo-1614732414444-096e5f1122d5?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Júpiter">
+            </div>
+        </div>
+
+        <!-- Diapositiva 10 -->
+        <div class="slide" data-speech="Observen con atención a Saturno, el planeta más elegante de todo el universo. Saturno está rodeado por unos anillos maravillosos y brillantes hechos de millones de trozos de hielo y rocas congeladas que giran a su alrededor como si fuera un sombrero mágico. ¡Es una obra de arte del espacio!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Saturno y sus Anillos Mágicos</div>
+                <img src="https://images.unsplash.com/photo-1614732414444-096e5f1122d5?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Saturno">
+            </div>
+        </div>
+
+        <!-- Diapositiva 11 -->
+        <div class="slide" data-speech="Siguiendo nuestro viaje encontramos a Urano, un planeta muy curioso y divertido. Urano tiene un color azul verdoso muy suave y gira de lado, como si estuviera acostado dando marometas en el espacio profundo. Está muy lejos del Sol y por eso hace muchísimo frío allí. ¡Brrr, abríguese bien!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Urano, el Planeta Acostado</div>
+                <img src="https://images.unsplash.com/photo-1614313913007-2b4ae8ce32d6?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Urano">
+            </div>
+        </div>
+
+        <!-- Diapositiva 12 -->
+        <div class="slide" data-speech="Muy lejos, en los confines del sistema solar, vive Neptuno, el planeta del viento salvaje y de un color azul profundo como el mar. En Neptuno soplan los vientos más rápidos y fuertes de todo el espacio estelar. Es un mundo helado y misterioso que guarda grandes secretos cósmicos. ¡Qué frío tan emocionante!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Neptuno, el Mundo Azul y Helado</div>
+                <img src="https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Neptuno">
+            </div>
+        </div>
+
+        <!-- Diapositiva 13 -->
+        <div class="slide" data-speech="¿Alguna vez han visto una línea imaginaria uniendo estrellas? Las constelaciones son agrupaciones de estrellas en el cielo nocturno que forman figuras divertidas como animales, osos gigantes, cazadores o héroes legendarios. Los antiguos marineros las usaban para no perderse en altamar. ¡Busquen figuras en el cielo hoy!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Las Constelaciones del Cielo</div>
+                <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Constelaciones">
+            </div>
+        </div>
+
+        <!-- Diapositiva 14 -->
+        <div class="slide" data-speech="¡Miren una estrella fugaz cruzando velozmente la noche! Pidan un deseo con el corazón muy cerrado. Las estrellas fugaces son en realidad pequeños granos de polvo espacial que entran a gran velocidad en la atmósfera de la Tierra y se encienden creando un destello luminoso antes de desaparecer. ¡Pidan un deseo mágico!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Estrellas Fugaces y Deseos</div>
+                <img src="https://images.unsplash.com/photo-1517976487492-5750f3195933?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Estrella Fugaz">
+            </div>
+        </div>
+
+        <!-- Diapositiva 15 -->
+        <div class="slide" data-speech="Los valientes astronautas son exploradores humanos que viajan a bordo de grandes naves espaciales para investigar el universo y vivir en estaciones flotantes. Usan trajes espaciales especiales blancos con cascos protectores para poder respirar y caminar flotando sin gravedad. ¡De grande quiero ser un astronauta!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Los Astronautas Valientes</div>
+                <img src="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Astronauta">
+            </div>
+        </div>
+
+        <!-- Diapositiva 16 -->
+        <div class="slide" data-speech="Para viajar tan lejos, los humanos construyen poderosos cohetes espaciales impulsados por enormes motores de fuego y combustible. Al despegar hacen un ruido fuerte y rugen con gran energía para romper la fuerza de gravedad de la Tierra y volar hacia el espacio infinito. ¡Tres, dos, uno, cero... Despegue!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Cohetes Hacia el Espacio</div>
+                <img src="https://images.unsplash.com/photo-1517976487492-5750f3195933?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Cohete Espacial">
+            </div>
+        </div>
+
+        <!-- Diapositiva 17 -->
+        <div class="slide" data-speech="En el espacio exterior ocurre algo asombroso llamado gravedad cero. Como no hay una fuerza que nos empuje hacia el suelo, los objetos, el agua y los astronautas flotan alegremente por el aire dando volteretas y saltos divertidos sin parar. ¡Imagínense flotando como globos de colores en su salón de clases!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">La Magia de la Gravedad Cero</div>
+                <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Gravedad Cero">
+            </div>
+        </div>
+
+        <!-- Diapositiva 18 -->
+        <div class="slide" data-speech="Las galaxias son enormes ciudades formadas por miles de millones de estrellas, polvo cósmico y sistemas solares enteros girando unidos por la gravedad. Nuestra galaxia se llama la Vía Láctea y tiene forma de un remolino luminoso gigante donde vivimos todos nosotros. ¡El universo es un lugar maravilloso y gigante!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Las Galaxias y la Vía Láctea</div>
+                <img src="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Galaxia Vía Láctea">
+            </div>
+        </div>
+
+        <!-- Diapositiva 19 -->
+        <div class="slide" data-speech="Las nebulosas son guarderías de estrellas en el espacio. Son nubes gigantescas y coloridas de gas y polvo cósmico que brillan con tonos rosados, morados y azules intensos. En su interior nacen nuevas estrellas bebes que empiezan a brillar poco a poco. ¡Parecen pinturas hechas por artistas en el cielo!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Nebulosas Coloridas</div>
+                <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Nebulosa Espacial">
+            </div>
+        </div>
+
+        <!-- Diapositiva 20 -->
+        <div class="slide" data-speech="Hemos llegado al final de nuestra hermosa aventura espacial. Espero que hayan disfrutado tanto como yo descubriendo los planetas, las estrellas y los cohetes. Recuerden mirar siempre al cielo con curiosidad y seguir aprendiendo cada día. ¡Les mando un fuerte abrazo cósmico! ¡Hasta pronto!">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">¡Fin de la Aventura Espacial!</div>
+                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Despedida Espacial">
+            </div>
+        </div>
+
+        <!-- Diapositiva 21 (ÚLTIMA DIAPOSITIVA DE CRÉDITOS OFICIALES) -->
+        <div class="slide" data-speech="Esta presentación fue llevada a cabo por Celso Vladimir Bonilla, consultor y facilitador de tecnología educativa, en colaboración para los niños de primera infancia. Todos los derechos reservados.">
+            <div class="slide-content-box">
+                <div class="slide-title-overlay">Créditos de la Presentación</div>
+                <img src="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1200&auto=format&fit=crop" class="slide-image" alt="Créditos">
+                <div class="credits-container">
+                    <h2>Créditos Educativos</h2>
+                    <p>Esta presentación fue llevada a cabo por:</p>
+                    <p class="credits-author">Celso Vladimir Bonilla</p>
+                    <p><strong>Consultor y Facilitador de Tecnología Educativa</strong></p>
+                    <p>En colaboración especial para los niños de primera infancia.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FANTASMITA EVE DINÁMICO QUE VIAJA POR TODA LA PANTALLA -->
+        <div class="ghost-wrapper" id="ghost-eve" onclick="interactiveGhost()">
+            <div class="ghost-body" id="ghost-body">
+                <div class="ghost-cheeks">
+                    <div class="cheek"></div>
+                    <div class="cheek"></div>
+                </div>
+                <div class="ghost-face">
+                    <div class="ghost-eyes">
+                        <div class="ghost-eye"></div>
+                        <div class="ghost-eye"></div>
+                    </div>
+                    <div class="ghost-mouth"></div>
+                </div>
+                <div class="ghost-tail">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banda inferior fija de Derechos Reservados en todas las diapositivas -->
+        <div class="footer-band">
+            <span>Todos los derechos reservados el Vladimir Bonilla consultor y facilitador de tecnología educativa</span>
+        </div>
+    </div>
+
+    <!-- Script de Control de Presentación, Audio Espacial y Movimiento del Fantasmita -->
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let isPlaying = false;
+        let speechUtterance = null;
+        let audioContext = null;
+        
+        const ghostEve = document.getElementById('ghost-eve');
+        const ghostBody = document.getElementById('ghost-body');
+        const slideCounter = document.getElementById('slide-counter');
+
+        // Posiciones estratégicas por donde el fantasmita flota alrededor de la pantalla
+        const ghostPositions = [
+            { left: '78vw', top: '65vh' },
+            { left: '10vw', top: '70vh' },
+            { left: '80vw', top: '15vh' },
+            { left: '8vw', top: '18vh' },
+            { left: '75vw', top: '55vh' },
+            { left: '12vw', top: '60vh' }
+        ];
+
+        function startPresentation() {
+            document.getElementById('start-overlay').style.display = 'none';
+            isPlaying = true;
+            initAudioContext();
+            playCurrentSlide();
+            moveGhostAround();
+        }
+
+        // Sistema de Música Espacial Ambiental Suave con Web Audio API
+        function initAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                playSpaceAmbient();
+                setInterval(playSpaceAmbient, 10000);
+            } catch (e) {
+                console.log("AudioContext blocked or not supported");
+            }
+        }
+
+        function playSpaceAmbient() {
+            if (!audioContext || !isPlaying) return;
+            try {
+                // Generar acorde espacial resonante
+                const freqs = [146.83, 220.00, 293.66, 369.99]; // D3, A3, D4, F#4
+                freqs.forEach((freq, i) => {
+                    let osc = audioContext.createOscillator();
+                    let gain = audioContext.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+
+                    let now = audioContext.currentTime;
+                    gain.gain.setValueAtTime(0.001, now);
+                    gain.gain.linearRampToValueAtTime(0.012, now + 3 + i);
+                    gain.gain.linearRampToValueAtTime(0.0001, now + 9 + i);
+
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 9.5 + i);
+                });
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        // Movimiento flotante continuo de EVE por la pantalla
+        function moveGhostAround() {
+            if (!isPlaying) return;
+            const pos = ghostPositions[currentSlide % ghostPositions.length];
+            ghostEve.style.left = pos.left;
+            ghostEve.style.top = pos.top;
+        }
+
+        // Interactividad al hacer clic o tocar al fantasmita EVE
+        function interactiveGhost() {
+            ghostBody.classList.add('spin-spin');
+            
+            // Sonido alegre de interacción
+            if (audioContext) {
+                let osc = audioContext.createOscillator();
+                let gain = audioContext.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.3); // C6
+                gain.gain.setValueAtTime(0.05, audioContext.currentTime);
+                gain.gain.linearRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.start();
+                osc.stop(audioContext.currentTime + 0.3);
+            }
+
+            setTimeout(() => {
+                ghostBody.classList.remove('spin-spin');
+            }, 850);
+        }
+
+        function showSlide(index) {
+            window.speechSynthesis.cancel();
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (index + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            
+            moveGhostAround();
+
+            if (isPlaying) {
+                playCurrentSlide();
+            }
+        }
+
+        function manualNext() {
+            showSlide(currentSlide + 1);
+        }
+
+        function manualPrev() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Locución en voz alta por parte del Fantasmita EVE
+        function playCurrentSlide() {
+            if (!isPlaying) return;
+
+            const slideText = slides[currentSlide].getAttribute('data-speech');
+
+            speechUtterance = new SpeechSynthesisUtterance(slideText);
+            speechUtterance.lang = 'es-MX';
+            speechUtterance.rate = 0.92; // Ritmo pausado y educativo
+            speechUtterance.pitch = 1.35; // Voz aguda y tierno-fantasmal
+
+            const voices = window.speechSynthesis.getVoices();
+            const spanishVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Female') || v.name.includes('Elena') || v.name.includes('Sabina') || v.name.includes('Laura') || v.name.includes('Lucia') || v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Paulina')));
+            if (spanishVoice) {
+                speechUtterance.voice = spanishVoice;
+            }
+
+            speechUtterance.onstart = () => {
+                ghostEve.classList.add('speaking');
+            };
+
+            speechUtterance.onend = () => {
+                ghostEve.classList.remove('speaking');
+                // Al terminar el discurso, pasa a la siguiente diapositiva automáticamente
+                if (isPlaying) {
+                    setTimeout(() => {
+                        if (isPlaying) {
+                            showSlide(currentSlide + 1);
+                        }
+                    }, 1200);
+                }
+            };
+
+            speechUtterance.onerror = () => {
+                ghostEve.classList.remove('speaking');
+            };
+
+            window.speechSynthesis.speak(speechUtterance);
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+    </script>
+</body>
+</html>
